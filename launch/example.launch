@@ -1,0 +1,34 @@
+<!-- This launch file gives an example of resizing an image and publishing
+     the resized image and configuration to new topics-->
+<launch>
+
+    <param name="use_sim_time" value="true" />
+
+    <!-- Publishes /original/camera_info and /original/image -->
+    <node 
+        pkg="rosbag"
+        type="play"
+        name="player"
+        output="screen"
+        args="--clock $(find image_resize_demo)/example_video.bag" />
+
+    <!-- Publishes to /resize_img/camera_info and /resize_img/image -->
+    <node pkg="nodelet" type="nodelet" name="resize_img" args="standalone image_proc/resize">
+        <!-- Use our own input topics instead of the defaults -->
+        <remap from="image" to="original/image"/>
+        <remap from="camera_info" to="original/camera_info"/>
+
+        <!-- Reduce the height and width by a factor of 5 -->
+        <param name="scale_height" type="double" value="0.2" />
+        <param name="scale_width" type="double" value="0.2" />
+    </node>
+
+    <!-- Display the original and resized images -->
+    <node pkg="image_view" type="image_view" name="original_viewer">
+        <remap from="image" to="original/image"/>
+    </node>
+    <node pkg="image_view" type="image_view" name="resize_img_viewer">
+        <remap from="image" to="resize_img/image"/>
+    </node>
+
+</launch>
